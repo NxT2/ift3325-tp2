@@ -12,26 +12,7 @@ public class Trame {
 	public Trame(){
 		
 	}
-	
-	//Getters qui retourne la valeur binaire
-	public String getTypeBin() throws UnsupportedEncodingException{
-		byte[] b = type.getBytes("UTF-8");
-		return Integer.toBinaryString(b[0]);
-	}
-	
-	public String getNumBin(){
-		return Integer.toBinaryString(num);
-	}
-	
-	public String getDataBin() throws UnsupportedEncodingException{
-		byte[] b = data.getBytes("UTF-8");
-		return (Integer.toBinaryString(b[0])+Integer.toBinaryString(b[1]));
-	}
-	
-	public String getCRCBin() throws UnsupportedEncodingException{
-		byte[] b = crc.getBytes("UTF-8");
-		return Integer.toBinaryString(b[0]);
-	}
+
 	//Getters et Setters
 	public String getType() {
 		return type;

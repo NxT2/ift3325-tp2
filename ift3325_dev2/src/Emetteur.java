@@ -16,18 +16,23 @@ public class Emetteur {
 	private int[] polynome;
 
 	public static void main(String[] args) throws UnsupportedEncodingException{
-		Reader reader = new Reader(args[2]);
-		nomMachine = args[0];
-		numPort = Integer.parseInt(args[1]);
-		ArrayList<String> trameList = new ArrayList<String>();
-		
-		trameList = createTrames(reader);
-		
-		send(trameList);
+		if(args.length != 3){
+			System.out.println("Erreur de syntaxe: <Nom_Machine> <Num_Port> <Nom_Fichier>");
+		}
+		else{
+			Reader reader = new Reader(args[2]);
+			nomMachine = args[0];
+			numPort = Integer.parseInt(args[1]);
+			ArrayList<String> trameList = new ArrayList<String>();
+
+			trameList = createTrames(reader);
+
+			send(trameList);
+		}
 	}
 
 	/**
-	 * envoie toutes les trames
+	 * envoie toutes les trames de la liste de trame
 	 * @param trameList
 	 */
 	private static void send(ArrayList<String> trameList) throws UnsupportedEncodingException{
@@ -85,10 +90,10 @@ public class Emetteur {
 				t.setCrc(computeCRC(t));
 
 				String trameBin = t.getFlag() 
-						+ bitStuffing(t.getTypeBin())
-						+ bitStuffing(t.getNumBin())
-						+ bitStuffing(t.getDataBin())
-						+ bitStuffing(t.getCRCBin())
+						+ bitStuffing(BinConverter.convertToBin(t.getType()))
+						+ bitStuffing(BinConverter.convertToBin(t.getNum()))
+						+ bitStuffing(BinConverter.convertToBin(t.getData()))
+						+ bitStuffing(BinConverter.convertToBin(t.getCrc()))
 						+ t.getFlag();
 
 				trameList.add(trameBin);
