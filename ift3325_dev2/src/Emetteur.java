@@ -11,38 +11,35 @@ import java.util.Random;
 
 public class Emetteur {
 
-	private String nomMachine;
-	private int numPort;
-	private Reader reader;
-	
-	//Constructeur
-	public Emetteur(String[] args){
+	private static String nomMachine;
+	private static int numPort;
+	private int[] polynome;
+
+	public static void main(String[] args) throws UnsupportedEncodingException{
+		Reader reader = new Reader(args[2]);
 		nomMachine = args[0];
 		numPort = Integer.parseInt(args[1]);
-		reader = new Reader(args[2]);
-	}
-	
-	//Execute l'emetteur
-	public void run() throws UnsupportedEncodingException{
-
-			ArrayList<String> trameList = createTrames(reader);
-			send(nomMachine, numPort, trameList);
+		ArrayList<String> trameList = new ArrayList<String>();
+		
+		trameList = createTrames(reader);
+		
+		send(trameList);
 	}
 
 	/**
 	 * envoie toutes les trames
 	 * @param trameList
 	 */
-	private void send(String nomMachine, int numPort, ArrayList<String> trameList) throws UnsupportedEncodingException{
+	private static void send(ArrayList<String> trameList) throws UnsupportedEncodingException{
 		try {
 			Socket socket = new Socket(nomMachine, numPort);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			PrintWriter out = new PrintWriter(socket.getOutputStream());
-			
+
 			//Reception
 			String line = in.readLine();
 			System.out.println(line);
-			
+
 			//Emission
 			for(int i=0; i<trameList.size();i++){
 				//t1.sleep(1000);
@@ -56,7 +53,7 @@ public class Emetteur {
 				out.flush();
 				socket.close();
 			}
-			
+
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -70,29 +67,30 @@ public class Emetteur {
 	}
 
 	/**
-	 * Genere les trames a partir du fichier
+	 * Genere les trames de type Information a partir du fichier
 	 * @param Reader
 	 * @return ArrayList<String>
 	 */
-	private ArrayList<String> createTrames(Reader reader){
+	private static ArrayList<String> createTrames(Reader reader){
+
 		ArrayList<String> trameList = new ArrayList<String>();
 		try{
 			ArrayList<String> dataList = reader.read();
 
 			for(int i=0; i<dataList.size();i++){
 				Trame t = new Trame();
-				t.setType(generateType());
+				t.setType("i");	//les trames avec les donnees sont toutes de type information
 				t.setNum(i % 8);
 				t.setData(dataList.get(i));
 				t.setCrc(computeCRC(t));
-				
+
 				String trameBin = t.getFlag() 
 						+ bitStuffing(t.getTypeBin())
 						+ bitStuffing(t.getNumBin())
 						+ bitStuffing(t.getDataBin())
 						+ bitStuffing(t.getCRCBin())
 						+ t.getFlag();
-				
+
 				trameList.add(trameBin);
 			}
 		}catch(Exception e){
@@ -106,10 +104,10 @@ public class Emetteur {
 	 * @param trame
 	 * @return String
 	 */
-	private String bitStuffing(String t){
+	private static String bitStuffing(String t){
 		String res = "";
 		int count = 0;
-		
+
 		for(int i=0; i<t.length(); i++){
 			if(t.charAt(i) == '1'){
 				count++;
@@ -117,28 +115,28 @@ public class Emetteur {
 			else{
 				count = 0;
 			}
-			
+
 			res = res + t.charAt(i);
-			
+
 			if(count == 5){
 				res = res + '0';
 				count = 0;
 			}
 		}
-		
+
 		return res;
 	}
-	
+
 	/**
 	 * calcule le CRC de la trame
 	 * @param t
 	 * @return String
 	 */
-	private String computeCRC(Trame t) {
+	private static String computeCRC(Trame t) {
 		String res = "";
-		
+
 		//TODO
-		
+
 		return res;
 	}
 
@@ -146,7 +144,7 @@ public class Emetteur {
 	 * Genere le type de la trame aleatoirement
 	 * @return String
 	 */
-	private String generateType() {
+	private static String generateType() {
 		String res = "";
 		int rand = new Random().nextInt(4);
 		if(rand == 0){
