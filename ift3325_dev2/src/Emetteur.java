@@ -1,5 +1,6 @@
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -13,19 +14,20 @@ public class Emetteur {
 
 	private static String nomMachine;
 	private static int numPort;
-	private int[] polynome;
+	private static int[] polynome;
+	private static ArrayList<String> dataList;
 
-	public static void main(String[] args) throws UnsupportedEncodingException{
+	public static void main(String[] args) throws UnsupportedEncodingException, FileNotFoundException{
 		if(args.length != 3){
 			System.out.println("Erreur de syntaxe: <Nom_Machine> <Num_Port> <Nom_Fichier>");
 		}
 		else{
-			Reader reader = new Reader(args[2]);
+			dataList = Reader.read(args[2]);
 			nomMachine = args[0];
 			numPort = Integer.parseInt(args[1]);
 			ArrayList<String> trameList = new ArrayList<String>();
 
-			trameList = createTrames(reader);
+			trameList = createTrames();
 
 			send(trameList);
 		}
@@ -76,11 +78,10 @@ public class Emetteur {
 	 * @param Reader
 	 * @return ArrayList<String>
 	 */
-	private static ArrayList<String> createTrames(Reader reader){
+	private static ArrayList<String> createTrames(){
 
 		ArrayList<String> trameList = new ArrayList<String>();
 		try{
-			ArrayList<String> dataList = reader.read();
 
 			for(int i=0; i<dataList.size();i++){
 				Trame t = new Trame();

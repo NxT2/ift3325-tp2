@@ -7,11 +7,10 @@ import java.io.FileNotFoundException;
 
 public class Reader {
 
-	private String fileName;
-	private BufferedReader in;
+	private static BufferedReader in;
 	
-	public Reader(String fileName){
-		this.fileName = fileName;
+	public Reader(){
+
 	}
 	
 	/**
@@ -19,7 +18,7 @@ public class Reader {
 	 * @return ArrayList<String>
 	 * @throws FileNotFoundException
 	 */
-	public ArrayList<String> read() throws FileNotFoundException{
+	public static ArrayList<String> read(String fileName) throws FileNotFoundException{
 		System.out.println("Reading:" + fileName);
 		
 		ArrayList<String> lineList = new ArrayList<String>();
