@@ -14,7 +14,7 @@ public class Emetteur {
 
 	private static String nomMachine;
 	private static int numPort;
-	private static int[] polynome;
+	private static int[] polynome = {1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1};
 	private static ArrayList<String> dataList;
 
 	public static void main(String[] args) throws UnsupportedEncodingException, FileNotFoundException{
@@ -140,9 +140,56 @@ public class Emetteur {
 	 */
 	private static String computeCRC(Trame t) {
 		String res = "";
-
-		//TODO
-
+		String msgStr = t.computeString();
+		int i=0;
+		int[] msg = new int[msgStr.length()+16];
+		int[] div = new int[polynome.length];
+		int[] remainder = new int[polynome.length];
+		
+		for(i=0; i<msgStr.length();i++){
+			msg[i]=Integer.parseInt(msgStr.substring(i,i+1));
+		}
+		
+		for(;i<msg.length;i++){
+			msg[i]=0;
+		}
+		
+		//dividende initial
+		for(i=0;i<div.length;i++){
+			div[i] = msg[i];
+		}
+		i++;
+		do{
+			remainder = divideXOR(div);
+			
+			//trouver le reste commence par combien de zeros
+			int k = 0;
+			while(remainder[k] == 0){
+				k++;
+			}
+			int j=0;
+			//mettre le reste dans la dividende
+			for(;k<remainder.length;k++){
+				div[j]=remainder[k];
+				j++;
+			}
+			//remplir la dividende
+			for(;j<div.length;j++){
+				if(i<msg.length){
+					div[j]=msg[i];
+					i++;
+				}
+				else{
+					break;
+				}
+			}
+		}while(i<msg.length);
+		
+		//mettre le reste en string
+		for(int j = 0; j<remainder.length;j++){
+			res = res + String.valueOf(remainder[i]);
+		}
+		
 		return res;
 	}
 
@@ -150,21 +197,36 @@ public class Emetteur {
 	 * Genere le type de la trame aleatoirement
 	 * @return String
 	 */
-	private static String generateType() {
-		String res = "";
-		int rand = new Random().nextInt(4);
-		if(rand == 0){
-			res="i";
+//	private static String generateType() {
+//		String res = "";
+//		int rand = new Random().nextInt(4);
+//		if(rand == 0){
+//			res="i";
+//		}
+//		else if(rand == 1){
+//			res="c";
+//		}
+//		else if(rand == 2){
+//			res="f";
+//		}
+//		else if(rand == 3){
+//			res="p";
+//		}
+//		return res;
+//	}
+	
+	private static int[] divideXOR(int[] div){
+		int reste[] = new int[polynome.length];
+		
+		for(int i=0; i<reste.length;i++){
+			if(div[i] == polynome[i]){
+				reste[i] = 0;
+			}
+			else{
+				reste[i] = 1;
+			}
 		}
-		else if(rand == 1){
-			res="c";
-		}
-		else if(rand == 2){
-			res="f";
-		}
-		else if(rand == 3){
-			res="p";
-		}
-		return res;
+		
+		return reste;
 	}
 }

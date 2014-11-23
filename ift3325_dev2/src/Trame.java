@@ -13,6 +13,10 @@ public class Trame {
 		
 	}
 
+	public String computeString(){
+		return (this.type+this.num+this.data);
+	}
+	
 	//Getters et Setters
 	public String getType() {
 		return type;
