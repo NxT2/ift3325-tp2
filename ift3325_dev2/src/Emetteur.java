@@ -14,12 +14,12 @@ public class Emetteur {
 
 	private static String nomMachine;
 	private static int numPort;
-	private static int[] polynome = {1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1};
+	public static int[] polynome = {1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1};
 	private static ArrayList<String> dataList;
 
 	public static void main(String[] args) throws UnsupportedEncodingException, FileNotFoundException{
 		if(args.length != 3){
-			System.out.println("Erreur de syntaxe: <Nom_Machine> <Num_Port> <Nom_Fichier>");
+			System.out.println("E> Erreur de syntaxe: <Nom_Machine> <Num_Port> <Nom_Fichier>");
 		}
 		else{
 			dataList = Reader.read(args[2]);
@@ -54,7 +54,7 @@ public class Emetteur {
 				out.flush();
 				if(i%3 == 0){
 					line = in.readLine();
-					System.out.println("Emetteur recoit: " + line);
+					System.out.println("E> Emetteur recoit: " + line);
 				}
 				out.println("fin");
 				out.flush();
@@ -215,7 +215,7 @@ public class Emetteur {
 //		return res;
 //	}
 	
-	private static int[] divideXOR(int[] div){
+	public static int[] divideXOR(int[] div){
 		int reste[] = new int[polynome.length];
 		
 		for(int i=0; i<reste.length;i++){
