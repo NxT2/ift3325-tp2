@@ -197,15 +197,17 @@ public class Emetteur {
 			div[i] = msg[i];
 		}
 		i++;
+		int j=0;
+		int k=0;
 		do{
 			remainder = divideXOR(div);
 			
 			//trouver le reste commence par combien de zeros
-			int k = 0;
-			while(remainder[k] == 0){
+			k = 0;
+			while(remainder[k] == 0 && k < remainder.length){
 				k++;
 			}
-			int j=0;
+			j=0;
 			//mettre le reste dans la dividende
 			for(;k<remainder.length;k++){
 				div[j]=remainder[k];
@@ -224,7 +226,7 @@ public class Emetteur {
 		}while(i<msg.length);
 		
 		//mettre le reste en string
-		for(int j = 0; j<remainder.length;j++){
+		for(j = 0; j<remainder.length;j++){
 			res = res + String.valueOf(remainder[i]);
 		}
 		

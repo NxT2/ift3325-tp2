@@ -21,7 +21,12 @@ public class Recepteur implements Runnable{
 		else{
 			numPort = Integer.parseInt(args[0]);
 			connect();
-			
+			try {
+				receive();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -55,7 +60,6 @@ public class Recepteur implements Runnable{
 				}
 				else{	//ce n'est pas la fin
 					if(isError(msg)){
-						System.out.println("R> Recu: Trame erronnée. REJ");
 						sendRej(msg);
 					}
 					else{	//pas d'erreur
@@ -93,9 +97,80 @@ public class Recepteur implements Runnable{
 	 */
 	public static boolean isError(String msg){
 		
+		boolean isError = false;
+		String unstuffMsg = unBitStuff(msg);
+		int[] remainder = new int[Emetteur.polynome.length];
+		int[] receivedMsg = new int[unstuffMsg.length()];
+		int[] div = new int[Emetteur.polynome.length];
+		
+		for(int i=0; i<unstuffMsg.length();i++){
+			receivedMsg[i] = unstuffMsg.charAt(i);
+		}
+
+		int i = 0;
+		int j = 0;
+		int k = 0;
+		do{
+			for(i=0; i<div.length;i++){
+				div[i] = receivedMsg[i];
+			}
+
+			remainder = Emetteur.divideXOR(receivedMsg);
+			
+			//trouver le reste commence par combien de zeros
+			k=0;
+			while(remainder[k]==0 && k < remainder.length){
+				k++;
+			}
+			
+			//mettre le reste dans la dividende
+			j=0;
+			for(;k<remainder.length;k++){
+				div[j]=remainder[k];
+				j++;
+			}
+			
+			//remplir la dividende
+			for(;j<div.length;j++){
+				if(i<receivedMsg.length){
+					div[j]=receivedMsg[i];
+					i++;
+				}
+				else{
+					break;
+				}
+			}
+			
+		} while(i<receivedMsg.length);
+
+		for(int l=0; l<remainder.length;l++){
+			if(remainder[l]!=0){
+				int num = getTrameNum(msg);
+				System.out.println("R> Trame "+ num +" erronnée");
+				isError = true;
+				break;
+			}
+			else if(i == remainder.length-1){	//atteint la fin du reste sans rencontre de 0
+				isError = false;
+			}
+		}
 		
 		
-		return false;
+		return isError;
+	}
+	
+	/**
+	 * retourne le numero de la trame
+	 * @param t
+	 * @return
+	 */
+	private static int getTrameNum(String t){
+		int res = 0;
+		
+		String num = t.substring(16, 25);
+		res = Integer.parseInt(convertBin(num));
+		
+		return res;
 	}
 	
 	/**
