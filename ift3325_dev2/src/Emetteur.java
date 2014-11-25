@@ -8,7 +8,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Emetteur {
 
@@ -17,6 +16,11 @@ public class Emetteur {
 	public static int[] polynome = {1,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1};
 	private static ArrayList<String> dataList;
 
+	//mettre testFlipBit a true pour simuler les insertions d'erreurs
+	private static boolean testFlipBit = false;
+	//mettre testLost a true pour simuler les trames perdues
+	private static boolean testLost = false;
+	
 	public static void main(String[] args) throws UnsupportedEncodingException, FileNotFoundException{
 		if(args.length != 3){
 			System.out.println("E> Erreur de syntaxe: <Nom_Machine> <Num_Port> <Nom_Fichier>");
@@ -25,11 +29,11 @@ public class Emetteur {
 			dataList = Reader.read(args[2]);
 			nomMachine = args[0];
 			numPort = Integer.parseInt(args[1]);
-			ArrayList<String> trameList = new ArrayList<String>();
-
+			ArrayList<Trame> trameList = new ArrayList<Trame>();
+			ArrayList<String> binTrameList = new ArrayList<String>();
 			trameList = createTrames();
-
-			send(trameList);
+			binTrameList = binTrame(trameList);
+			send(binTrameList);
 		}
 	}
 
@@ -37,8 +41,9 @@ public class Emetteur {
 	 * envoie toutes les trames de la liste de trame
 	 * @param trameList
 	 */
-	private static void send(ArrayList<String> trameList) throws UnsupportedEncodingException{
+	private static void send(ArrayList<String> trames) throws UnsupportedEncodingException{
 		try {
+			ArrayList<String> trameList = trames;
 			Socket socket = new Socket(nomMachine, numPort);
 			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			PrintWriter out = new PrintWriter(socket.getOutputStream());
@@ -46,7 +51,19 @@ public class Emetteur {
 			//Reception
 			String line = in.readLine();
 			System.out.println(line);
-
+			
+			//Simulation d'erreurs
+			if(testFlipBit){
+				ArrayList<String> trameListErr = new ArrayList<String>();
+				trameListErr = Tests.flipBit(trames);
+				trameList = trameListErr;
+			}
+			if(testLost){
+				ArrayList<String> trameListErr = new ArrayList<String>();
+				trameListErr = Tests.lostTrame(trames);
+				trameList = trameListErr;
+			}
+			
 			//Emission
 			for(int i=0; i<trameList.size();i++){
 				//t1.sleep(1000);
@@ -54,7 +71,7 @@ public class Emetteur {
 				out.flush();
 				if(i%3 == 0){
 					line = in.readLine();
-					System.out.println("E> Emetteur recoit: " + line);
+					System.out.println("E> Emetteur envoie: " + line);
 				}
 				out.println("fin");
 				out.flush();
@@ -78,9 +95,9 @@ public class Emetteur {
 	 * @param Reader
 	 * @return ArrayList<String>
 	 */
-	private static ArrayList<String> createTrames(){
+	private static ArrayList<Trame> createTrames(){
 
-		ArrayList<String> trameList = new ArrayList<String>();
+		ArrayList<Trame> trameList = new ArrayList<Trame>();
 		try{
 
 			for(int i=0; i<dataList.size();i++){
@@ -90,19 +107,40 @@ public class Emetteur {
 				t.setData(dataList.get(i));
 				t.setCrc(computeCRC(t));
 
-				String trameBin = t.getFlag() 
-						+ bitStuffing(BinConverter.convertToBin(t.getType()))
-						+ bitStuffing(BinConverter.convertToBin(t.getNum()))
-						+ bitStuffing(BinConverter.convertToBin(t.getData()))
-						+ bitStuffing(BinConverter.convertToBin(t.getCrc()))
-						+ t.getFlag();
-
-				trameList.add(trameBin);
+				trameList.add(t);
 			}
 		}catch(Exception e){
 
 		}
+		
+		//Creer la trame de fin
+		Trame end = new Trame("f","00","00");
+		trameList.add(end);
+		
 		return trameList;
+	}
+	
+	/**
+	 * transforme toutes les trames en binaire
+	 * @param trameList
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	private static ArrayList<String> binTrame(ArrayList<Trame> trameList) throws UnsupportedEncodingException{
+		ArrayList<String> binTrameList = new ArrayList<String>();
+		
+		for(int i=0; i<trameList.size();i++){
+			Trame t = trameList.get(i);
+		String trameBin = t.getFlag() 
+				+ bitStuffing(BinConverter.convertToBin(t.getType()))
+				+ bitStuffing(BinConverter.convertToBin(t.getNum()))
+				+ bitStuffing(BinConverter.convertToBin(t.getData()))
+				+ bitStuffing(BinConverter.convertToBin(t.getCrc()))
+				+ t.getFlag();
+		
+		binTrameList.add(trameBin);
+		}
+		return binTrameList;
 	}
 
 	/**
@@ -192,28 +230,6 @@ public class Emetteur {
 		
 		return res;
 	}
-
-	/**
-	 * Genere le type de la trame aleatoirement
-	 * @return String
-	 */
-//	private static String generateType() {
-//		String res = "";
-//		int rand = new Random().nextInt(4);
-//		if(rand == 0){
-//			res="i";
-//		}
-//		else if(rand == 1){
-//			res="c";
-//		}
-//		else if(rand == 2){
-//			res="f";
-//		}
-//		else if(rand == 3){
-//			res="p";
-//		}
-//		return res;
-//	}
 	
 	public static int[] divideXOR(int[] div){
 		int reste[] = new int[polynome.length];

@@ -13,6 +13,12 @@ public class Trame {
 		
 	}
 
+	public Trame(String type, String data, String crc){
+		this.type = type;
+		this.data = data;
+		this.crc = crc;
+	}
+	
 	public String computeString(){
 		return (this.type+this.num+this.data);
 	}

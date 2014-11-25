@@ -29,6 +29,21 @@ public class Tests {
 		return trames;
 	}
 	
+	/**
+	 * efface aleatoirement une trame
+	 * @param trameList
+	 * @return
+	 */
+	public static ArrayList<String> lostTrame(ArrayList<String> trameList){
+		ArrayList<String> trames = trameList;
+		int lost = new Random().nextInt(2);
+		if(lost == 0){
+			int trameNum = new Random().nextInt(trameList.size());	//trame qui est perdue
+			trames.remove(trameNum);
+		}
+		return trames;
+	}
+	
 	private static char flipBit(char bit){
 		if(bit == 1){
 			return 0;
